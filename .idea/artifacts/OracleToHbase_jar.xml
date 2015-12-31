@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="OracleToHbase:jar">
+  <artifact type="jar" name="OracleToHbase:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/OracleToHbase</output-path>
     <root id="archive" name="OracleToHbase.jar">
       <element id="module-output" name="OracleToHbase" />

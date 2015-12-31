@@ -26,7 +26,7 @@ class OracleToHbase extends Job {
   }
 
   def takeHbaseNotExistTables(): Array[DBInfo] = {
-    val dBInfos: Array[DBInfo] = OracleUtil.takeAllTablesInfo(PropertiesUtil.loadProData())
+    val dBInfos: Array[DBInfo] = OracleUtil.takeAllTablesInfo(PropertiesUtil.loadProData("/db.properties"))
     val hbaseTables: Array[String] = HBaseUtil.getTableNames
 
     val buffer: ArrayBuffer[DBInfo] = ArrayBuffer()
@@ -72,7 +72,7 @@ class OracleToHbase extends Job {
     options += "--split-by"
     options += splitCol
     options += "--num-mappers"
-    options += "8"
+    options += "16"
     options += "--hbase-table"
     options += hbaseTable
     options += "--column-family"
@@ -95,8 +95,8 @@ object OracleToHbase {
 
   def main(args: Array[String]): Unit = {
     val job = new OracleToHbase
-    QuartzUtil.addJob(JOB_NAME, job, QUARTZ_TIME)
-    //    job.inputDataToHbase(job.takeHbaseNotExistTables())
+    //    QuartzUtil.addJob(JOB_NAME, job, QUARTZ_TIME)
+    job.inputDataToHbase(job.takeHbaseNotExistTables())
 
     //    val a = Array(DBInfo("aaa", "aaa", Array("111", "222", "333"), "aaa"), DBInfo("bbb", "bbb", Array("444", "555", "666"), "bbb"), DBInfo("ccc", "ccc", Array("777", "888", "999"), "ccc"))
     //    a.foreach(db => db.tablesName.foreach(name => println(name + " " + db.username)))

@@ -1,8 +1,6 @@
 package com.navinfo.util
 
 import java.sql.{Connection, DriverManager}
-import java.util
-import java.util.ArrayList
 
 import org.apache.log4j.Logger
 
@@ -37,20 +35,27 @@ object OracleUtil {
         null
     }
   }
-  def takeTablesName(username: String, password: String, url: String): Array[String] = {
+  def takeTablesName(username: String, password: String, url: String, tableType: String): Array[String] = {
     val conn = getConn(username, password, url)
+    val tableTypes = tableType.split(",")
     log.info("用户 " + username + " 数据库链接创建成功")
     val stmt = conn.createStatement()
     val res = stmt.executeQuery("select table_name from user_tables")
     val arr = new ArrayBuffer[String]()
     while (res.next())
       arr append res.getString("TABLE_NAME")
-    arr.toArray
+    arr.filter(name => {
+      var flag = false
+      for (ttype <- tableTypes) {
+        flag = flag || name.contains(ttype)
+      }
+      flag
+    }).toArray
   }
   def takeAllTablesInfo(prop: Prop): Array[DBInfo] = {
     val users: Array[String] = prop.usernames.split(",")
     for (user <- users) yield {
-      DBInfo(user, user, takeTablesName(user, user, prop.url), prop.url)
+      DBInfo(user, user, takeTablesName(user, user, prop.url, prop.tableType), prop.url)
     }
   }
   def main(args: Array[String]) {

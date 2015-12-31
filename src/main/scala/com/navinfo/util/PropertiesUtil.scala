@@ -1,6 +1,6 @@
 package com.navinfo.util
 
-import java.io.InputStream
+import java.io.{File, FileInputStream, InputStream}
 import java.util.Properties
 
 /**
@@ -19,17 +19,20 @@ import java.util.Properties
 class PropertiesUtil {}
 
 object PropertiesUtil {
-  def loadProData(): Prop = {
+  def loadProData(s: String): Prop = {
     val propt = new Properties()
-    val inputStream: InputStream = PropertiesUtil.getClass.getClassLoader.getResourceAsStream("db.properties")
+    val dbFile = new File(s)
+    val inputStream: InputStream = if(dbFile.exists()) new FileInputStream(dbFile) else PropertiesUtil.getClass.getClassLoader.getResourceAsStream("db.properties")
     propt.load(inputStream)
-    val prop = Prop(propt.getProperty("db.username"), propt.getProperty("db.url"))
+    val prop = Prop(propt.getProperty("db.username"), propt.getProperty("db.url"), propt.getProperty("db.table.type"))
     inputStream.close()
     prop
   }
+
+  def loadProData(): Prop = loadProData("")
 
   def main(args: Array[String]): Unit = {
     println(loadProData().usernames)
   }
 }
-case class Prop(usernames: String, url: String)
+case class Prop(usernames: String, url: String, tableType: String)
