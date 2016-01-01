@@ -26,7 +26,7 @@ class OracleToHbase extends Job {
   }
 
   def takeHbaseNotExistTables(): Array[DBInfo] = {
-    val dBInfos: Array[DBInfo] = OracleUtil.takeAllTablesInfo(PropertiesUtil.loadProData("/db.properties"))
+    val dBInfos: Array[DBInfo] = OracleUtil.takeAllTablesInfo(PropertiesUtil.loadProData("/home/hadoop/app/orclToHbase/db.properties"))
     val hbaseTables: Array[String] = HBaseUtil.getTableNames
 
     val buffer: ArrayBuffer[DBInfo] = ArrayBuffer()
@@ -35,7 +35,7 @@ class OracleToHbase extends Job {
     })
     buffer.toArray
   }
-
+  //TODO 无法导入LINK表！！！
   def inputDataToHbase(tables: Array[DBInfo]): Unit = {
 
     val array: Array[String] = tables.flatMap(_.tablesName).filter(s => s != null && s.length > 0)

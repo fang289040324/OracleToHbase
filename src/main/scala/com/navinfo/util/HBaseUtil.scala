@@ -1,8 +1,7 @@
 package com.navinfo.util
 
-import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.client.ConnectionFactory
-import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, HBaseConfiguration, TableName}
+import org.apache.hadoop.hbase.{HBaseConfiguration, HColumnDescriptor, HTableDescriptor, TableName}
 import org.apache.log4j.Logger
 
 /**
@@ -75,5 +74,11 @@ object HBaseUtil {
     } catch {
       case e: Exception =>
     }
+  }
+
+  def main(args: Array[String]): Unit = {
+//    val array: Array[String] = Array("G_02AUT_POI", "G_07SUM_POI", "G_12AUT_POI", "G_12SPR_POI", "G_12SUM_POI", "G_12WIN_POI", "G_13AUT_POI", "G_13SPR_POI", "G_13SUM_POI", "G_13WIN_POI", "G_15AUT_POI", "G_15SPR_POI")
+//    array.foreach(deleteTable(_))
+//    close()
   }
 }
