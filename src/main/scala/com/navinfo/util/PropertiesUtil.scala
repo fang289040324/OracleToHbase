@@ -3,6 +3,8 @@ package com.navinfo.util
 import java.io.{File, FileInputStream, InputStream}
 import java.util.Properties
 
+import scala.collection.mutable.ArrayBuffer
+
 /**
   * Title. <br>
   * Description.
@@ -24,7 +26,14 @@ object PropertiesUtil {
     val dbFile = new File(s)
     val inputStream: InputStream = if(dbFile.exists()) new FileInputStream(dbFile) else PropertiesUtil.getClass.getClassLoader.getResourceAsStream("db.properties")
     propt.load(inputStream)
-    val prop = Prop(propt.getProperty("db.username"), propt.getProperty("db.url"), propt.getProperty("db.table.type"))
+    val mtables: Array[String] = propt.getProperty("db.modify.table").trim.split(",")
+//    val buffer: ArrayBuffer[String] = ArrayBuffer[String]()
+    var map: Map[String, String] = Map[String, String]()
+    mtables.foreach(table => {
+      map += (table -> propt.getProperty("db." + table + ".modify.sql").trim)
+    })
+    val prop = Prop(propt.getProperty("db.username").trim, propt.getProperty("db.url").trim, propt.getProperty("db.table.type").trim,
+      propt.getProperty("db.poi.sql").trim, propt.getProperty("db.link.sql").trim, propt.getProperty("db.modify.time").trim, mtables, map)
     inputStream.close()
     prop
   }
@@ -32,7 +41,7 @@ object PropertiesUtil {
   def loadProData(): Prop = loadProData("")
 
   def main(args: Array[String]): Unit = {
-    println(loadProData().usernames)
+    loadProData().modifySql.foreach(println)
   }
 }
-case class Prop(usernames: String, url: String, tableType: String)
+case class Prop(usernames: String, url: String, tableType: String, poiSql: String, linkSql: String, modifyTime: String, modifyTable: Array[String], modifySql: Map[String, String])

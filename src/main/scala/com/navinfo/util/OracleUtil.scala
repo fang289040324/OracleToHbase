@@ -25,15 +25,48 @@ object OracleUtil {
 
   val log = Logger.getLogger(classOf[OracleUtil])
 
+  val WILDCARD = "*"
+  val POINT = "\\."
+  val TABLE_PREFIX = "G_"
+  val COMMA = ","
+  val USER_TABLES_SQL = "select table_name from user_tables"
+  val TABLE_NAME_COL = "TABLE_NAME"
+
   def main(args: Array[String]) {
-    takeAllTablesInfo(PropertiesUtil.loadProData()).foreach(info => info.tablesName.foreach(println))
+//    takeAllTablesInfo(PropertiesUtil.loadProData()).foreach(info => info.tablesName.foreach(println))
+    takeAllModifyTablesInfo(PropertiesUtil.loadProData()).foreach(info => {
+      info.tablesName.foreach(x => print(x + " "))
+      println(info)
+    })
   }
 
   def takeAllTablesInfo(prop: Prop): Array[DBInfo] = {
+    log.info("加载需要导入的表")
     val users: Array[String] = prop.usernames.split(",")
     for (user <- users) yield {
-      DBInfo(user, user, takeTablesName(user, user, prop.url, prop.tableType), prop.url)
+      DBInfo(user, user, takeTablesName(user, user, prop.url, prop.tableType), prop.url, prop.poiSql, prop.linkSql, null)
     }
+  }
+
+  def takeAllModifyTablesInfo(prop: Prop): Array[DBInfo] = {
+    log.info("加载需要修改的表")
+    val infoes: Array[DBInfo] = for (table <- prop.modifyTable) yield {
+      val username = table.split(POINT)(0)
+      val mTable = table.split(POINT)(1)
+      val tablesName: Array[String] = takeTablesName(username, username, prop.url, prop.tableType)
+      if (mTable.contains(WILDCARD)) {
+        if(mTable.equals(WILDCARD)) DBInfo(username, username, tablesName, prop.url, null, null, prop.modifySql(table))
+        else{
+          val t = mTable.replace(WILDCARD, "")
+          if(tablesName.count(x => x.contains(t.toUpperCase) || x.contains(t.toLowerCase)) > 0)
+            DBInfo(username, username, tablesName.filter(x => x.contains(t.toUpperCase) || x.contains(t.toLowerCase)), prop.url, null, null, prop.modifySql(table))
+          else null
+        }
+      } else {
+        if (tablesName.count(x => x.equalsIgnoreCase(mTable)) == 1) DBInfo(username, username, Array(mTable), prop.url, null, null, prop.modifySql(table)) else null
+      }
+    }
+    infoes.filter(_ != null)
   }
 
   def takeTablesName(username: String, password: String, url: String, tableType: String): Array[String] = {
@@ -46,18 +79,18 @@ object OracleUtil {
     }
     if (conn != null) {
       log.info("用户 " + username + " 数据库链接创建成功")
-      val tableTypes = tableType.split(",")
+      val tableTypes = tableType.split(COMMA)
       val stmt = conn.createStatement()
-      val res = stmt.executeQuery("select table_name from user_tables")
+      val res = stmt.executeQuery(USER_TABLES_SQL)
       val arr = new ArrayBuffer[String]()
       while (res.next())
-        arr append res.getString("TABLE_NAME")
+        arr append res.getString(TABLE_NAME_COL)
       conn.close()
       log.info("用户 " + username + " 数据库链接关闭")
       arr.filter(name => {
         var flag = false
         for (ttype <- tableTypes) {
-          flag = (flag || name.contains(ttype)) && name.contains("G_")
+          flag = (flag || name.contains(ttype)) && name.contains(TABLE_PREFIX)
         }
         flag
       }).toArray
@@ -71,4 +104,4 @@ object OracleUtil {
   }
 }
 
-case class DBInfo(username: String, password: String, tablesName: Array[String], url: String)
+case class DBInfo(username: String, password: String, tablesName: Array[String], url: String, poiSql: String, linkSql: String, modifySql: String)

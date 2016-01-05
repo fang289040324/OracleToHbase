@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ScalaCompilerConfiguration">
     <profile name="Maven 1" modules="OracleToHbase">
-      <option name="postfixOps" value="true" />
       <parameters>
         <parameter value="-target:jvm-1.7" />
       </parameters>

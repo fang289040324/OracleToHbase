@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="OracleToHbase:jar">
+  <artifact type="jar" name="OracleToHbase:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/OracleToHbase</output-path>
     <root id="archive" name="OracleToHbase.jar">
       <element id="module-output" name="OracleToHbase" />
@@ -93,6 +93,20 @@
       <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/tomcat/jasper-runtime/5.5.23/jasper-runtime-5.5.23.jar" path-in-jar="/" />
       <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/xmlenc/xmlenc/0.52/xmlenc-0.52.jar" path-in-jar="/" />
       <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/sqoop/sqoop/1.4.6/sqoop-1.4.6-hadoop200.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-annotations/2.6.0/hadoop-annotations-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-auth/2.6.0/hadoop-auth-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-client/2.6.0/hadoop-client-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-mapreduce-client-app/2.6.0/hadoop-mapreduce-client-app-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-mapreduce-client-common/2.6.0/hadoop-mapreduce-client-common-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-mapreduce-client-core/2.6.0/hadoop-mapreduce-client-core-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-mapreduce-client-jobclient/2.6.0/hadoop-mapreduce-client-jobclient-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-mapreduce-client-shuffle/2.6.0/hadoop-mapreduce-client-shuffle-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-yarn-api/2.6.0/hadoop-yarn-api-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-yarn-client/2.6.0/hadoop-yarn-client-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-yarn-common/2.6.0/hadoop-yarn-common-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/development/mavenRepositoryIntellij/org/apache/hadoop/hadoop-yarn-server-common/2.6.0/hadoop-yarn-server-common-2.6.0.jar" path-in-jar="/" />
+      <element id="library" level="project" name="Maven: org.apache.hadoop:hadoop-hdfs:2.5.1" />
     </root>
   </artifact>
 </component>

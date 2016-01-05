@@ -105,6 +105,10 @@
                     <artifactId>commons-httpclient</artifactId>
                     <groupId>commons-httpclient</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-hdfs</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -148,7 +152,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.4</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
