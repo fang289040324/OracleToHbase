@@ -1,6 +1,6 @@
 package com.navinfo.util
 
-import java.sql.{Connection, DriverManager}
+import java.sql.{ResultSet, PreparedStatement, Connection, DriverManager}
 
 import org.apache.log4j.Logger
 
@@ -31,20 +31,33 @@ object OracleUtil {
   val COMMA = ","
   val USER_TABLES_SQL = "select table_name from user_tables"
   val TABLE_NAME_COL = "TABLE_NAME"
+  private val selectSql = "select count(1) from "
 
   def main(args: Array[String]) {
 //    takeAllTablesInfo(PropertiesUtil.loadProData()).foreach(info => info.tablesName.foreach(println))
-    takeAllModifyTablesInfo(PropertiesUtil.loadProData()).foreach(info => {
-      info.tablesName.foreach(x => print(x + " "))
-      println(info)
-    })
+//    takeAllModifyTablesInfo(PropertiesUtil.loadProData()).foreach(info => {
+//      info.tablesName.foreach(x => print(x + " "))
+//      println(info)
+//    })
+//    print(takeTableRecordsCount("g_02aut_poi", "gdb_2002", "gdb_2002", "jdbc:oracle:thin:@192.168.4.113:1521:orcl"))
+  }
+
+  def takeTableRecordsCount(tableName: String, username: String, password: String, url: String): Int ={
+    selectCountSql(tableName, getConn(username, password, url))
+  }
+
+  def selectCountSql(table: String, connection: Connection, sql: String = selectSql): Int = {
+    val statement: PreparedStatement = connection.prepareStatement(sql + table)
+    val rs: ResultSet = statement.executeQuery()
+    rs.next()
+    rs.getInt(1)
   }
 
   def takeAllTablesInfo(prop: Prop): Array[DBInfo] = {
     log.info("加载需要导入的表")
-    val users: Array[String] = prop.usernames.split(",")
+    val users: Array[String] = prop.oracleUsernames.split(",")
     for (user <- users) yield {
-      DBInfo(user, user, takeTablesName(user, user, prop.url, prop.tableType), prop.url, prop.poiSql, prop.linkSql, null)
+      DBInfo(user, user, takeTablesName(user, user, prop.oracleUrl, prop.tableType), prop.oracleUrl, prop.poiSql, prop.linkSql, null)
     }
   }
 
@@ -53,17 +66,17 @@ object OracleUtil {
     val infoes: Array[DBInfo] = for (table <- prop.modifyTable) yield {
       val username = table.split(POINT)(0)
       val mTable = table.split(POINT)(1)
-      val tablesName: Array[String] = takeTablesName(username, username, prop.url, prop.tableType)
+      val tablesName: Array[String] = takeTablesName(username, username, prop.oracleUrl, prop.tableType)
       if (mTable.contains(WILDCARD)) {
-        if(mTable.equals(WILDCARD)) DBInfo(username, username, tablesName, prop.url, null, null, prop.modifySql(table))
+        if(mTable.equals(WILDCARD)) DBInfo(username, username, tablesName, prop.oracleUrl, null, null, prop.modifySql(table))
         else{
           val t = mTable.replace(WILDCARD, "")
           if(tablesName.count(x => x.contains(t.toUpperCase) || x.contains(t.toLowerCase)) > 0)
-            DBInfo(username, username, tablesName.filter(x => x.contains(t.toUpperCase) || x.contains(t.toLowerCase)), prop.url, null, null, prop.modifySql(table))
+            DBInfo(username, username, tablesName.filter(x => x.contains(t.toUpperCase) || x.contains(t.toLowerCase)), prop.oracleUrl, null, null, prop.modifySql(table))
           else null
         }
       } else {
-        if (tablesName.count(x => x.equalsIgnoreCase(mTable)) == 1) DBInfo(username, username, Array(mTable), prop.url, null, null, prop.modifySql(table)) else null
+        if (tablesName.count(x => x.equalsIgnoreCase(mTable)) == 1) DBInfo(username, username, Array(mTable), prop.oracleUrl, null, null, prop.modifySql(table)) else null
       }
     }
     infoes.filter(_ != null)

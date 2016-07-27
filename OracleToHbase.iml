@@ -131,5 +131,6 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.jmock:jmock:2.4.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-library:1.1" level="project" />
     <orderEntry type="library" name="Maven: org.quartz-scheduler:quartz:1.8.6" level="project" />
+    <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.34" level="project" />
   </component>
 </module>

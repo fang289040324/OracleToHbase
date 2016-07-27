@@ -24,12 +24,17 @@ import scala.collection.mutable.ArrayBuffer
   * <p>
   */
 class OracleToHbase extends Job {
+
+  var prop: Prop = null
+
   override def execute(jobExecutionContext: JobExecutionContext): Unit = {
+    prop = PropertiesUtil.loadProData("/home/hadoop/app/orclToHbase/db.properties")
     inputDataToHbase(takeHbaseNotExistTables())
+    modifyDataToHbase(takeModifyTables())
   }
 
   def takeHbaseNotExistTables(): Array[DBInfo] = {
-    takeTables(OracleUtil.takeAllTablesInfo(OracleToHbase.prop), (x, y) => x.tablesName.filter(!y.contains(_)))
+    takeTables(OracleUtil.takeAllTablesInfo(prop), (x, y) => x.tablesName.filter(!y.contains(_)))
   }
 
   private def takeTables(dBInfos: Array[DBInfo], f: (DBInfo, Array[String]) => Array[String]): Array[DBInfo] = {
@@ -57,10 +62,40 @@ class OracleToHbase extends Job {
           OracleToHbase.log.info(name + " 表导入hbase结果为：失败")
           HBaseUtil.deleteTable(name.toUpperCase())
         } else {
+          MysqlUtil.updateHbaseRecordsCount(name, OracleUtil.takeTableRecordsCount(name, info.username, info.username, info.url), prop)
           OracleToHbase.log.info(name + " 表导入hbase结果为：成功")
         }
       })
     })
+  }
+
+  def takeModifyTables(): Array[DBInfo] = {
+    takeTables(OracleUtil.takeAllModifyTablesInfo(prop), (x, y) => x.tablesName.filter(y.contains(_)))
+  }
+
+  def modifyDataToHbase(tables: Array[DBInfo]): Unit = {
+    val format: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
+    val modifyTime: Long = format.parse(prop.modifyTime).getTime
+    val currentTime: Long = format.parse(format.format(new Date())).getTime
+    if (currentTime == modifyTime) {
+      val array: Array[String] = tables.flatMap(_.tablesName).filter(s => s != null && s.length > 0)
+      OracleToHbase.log.info(if (array.length > 0) "需要修改的hbase表：" + array.reduce(_ + "," + _) else "无修改表")
+
+      tables.foreach(info => {
+        info.tablesName.foreach(name => {
+          OracleToHbase.log.info("表 " + name + " 开始修改")
+          val result = Sqoop.runTool(setSqoopCommand(info.url, info.username, info.password, info.poiSql, info.linkSql, info.modifySql, name, OracleToHbase.SPLITCOL,
+            name.toUpperCase, OracleToHbase.HBASE_FAMILY, OracleToHbase.ROWKEY), HBaseUtil.conf)
+          if (result == 1) {
+            OracleToHbase.log.info(name + " 表修改hbase结果为：失败")
+          } else {
+            OracleToHbase.log.info(name + " 表修改hbase结果为：成功")
+          }
+        })
+      })
+    } else {
+      OracleToHbase.log.info("无修改表")
+    }
   }
 
   def setSqoopCommand(url: String, username: String, password: String, poiSql: String, linkSql: String, modifySql: String, tableName: String, splitCol: String,
@@ -100,35 +135,6 @@ class OracleToHbase extends Job {
     }
     options.toArray
   }
-
-  def takeModifyTables(): Array[DBInfo] = {
-    takeTables(OracleUtil.takeAllModifyTablesInfo(OracleToHbase.prop), (x, y) => x.tablesName.filter(y.contains(_)))
-  }
-
-  def modifyDataToHbase(tables: Array[DBInfo], prop: Prop): Unit = {
-    val format: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
-    val modifyTime: Long = format.parse(prop.modifyTime).getTime
-    val currentTime: Long = format.parse(format.format(new Date())).getTime
-    if (currentTime == modifyTime) {
-      val array: Array[String] = tables.flatMap(_.tablesName).filter(s => s != null && s.length > 0)
-      OracleToHbase.log.info(if (array.length > 0) "需要修改的hbase表：" + array.reduce(_ + "," + _) else "无修改表")
-
-      tables.foreach(info => {
-        info.tablesName.foreach(name => {
-          OracleToHbase.log.info("表 " + name + " 开始修改")
-          val result = Sqoop.runTool(setSqoopCommand(info.url, info.username, info.password, info.poiSql, info.linkSql, info.modifySql, name, OracleToHbase.SPLITCOL,
-            name.toUpperCase, OracleToHbase.HBASE_FAMILY, OracleToHbase.ROWKEY), HBaseUtil.conf)
-          if (result == 1) {
-            OracleToHbase.log.info(name + " 表修改hbase结果为：失败")
-          } else {
-            OracleToHbase.log.info(name + " 表修改hbase结果为：成功")
-          }
-        })
-      })
-    } else {
-      OracleToHbase.log.info("无修改表")
-    }
-  }
 }
 
 object OracleToHbase {
@@ -141,15 +147,17 @@ object OracleToHbase {
   val POI_TABLE_FLAG = "_POI"
   val LINK_TABLE_FLAG = "_LINK"
 
-  val prop: Prop = PropertiesUtil.loadProData("/home/hadoop/app/orclToHbase/db.properties")
-
   val log = Logger.getLogger(classOf[OracleToHbase])
 
   def main(args: Array[String]): Unit = {
+
     val job = new OracleToHbase
-    //    QuartzUtil.addJob(JOB_NAME, job, QUARTZ_TIME)
-    job.inputDataToHbase(job.takeHbaseNotExistTables())
-    job.modifyDataToHbase(job.takeModifyTables(), prop)
+    QuartzUtil.addJob(JOB_NAME, job, QUARTZ_TIME)
+
+    //    job.prop = PropertiesUtil.loadProData("/home/hadoop/app/orclToHbase/db.properties")
+    //    job.inputDataToHbase(job.takeHbaseNotExistTables())
+    //    job.modifyDataToHbase(job.takeModifyTables())
+
 
     //    job.takeModifyTables().foreach(info => {
     //      info.tablesName.foreach(x => print(x + " "))
